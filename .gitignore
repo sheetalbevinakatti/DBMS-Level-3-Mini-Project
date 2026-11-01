@@ -1,0 +1,38 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+
+# Node.js
+node_modules/
+.next/
+out/
+dist/
+build/
+
+# Database local files
+*.db
+*.sqlite
+*.sqlite3
+
+# ChromaDB local data
+chroma_data/
+vector_db/
+
+# IDE and operating system
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
