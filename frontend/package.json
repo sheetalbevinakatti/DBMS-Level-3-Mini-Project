@@ -1,5 +1,27 @@
 {
   "name": "dbms-level-3-mini-project-frontend",
   "version": "1.0.0",
-  "private": true
+  "private": true,
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1",
+    "build": "next build",
+    "start": "next start --hostname 127.0.0.1",
+    "db:setup": "node --env-file=.env.local --import=tsx scripts/run-sql.ts",
+    "db:index-vectors": "node --env-file=.env.local --import=tsx scripts/index-vectors.ts"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^4.3.2",
+    "mysql2": "^3.14.1",
+    "next": "^16.4.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.0"
+  }
 }

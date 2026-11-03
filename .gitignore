@@ -18,6 +18,7 @@ node_modules/
 out/
 dist/
 build/
+*.tsbuildinfo
 
 # Database local files
 *.db
