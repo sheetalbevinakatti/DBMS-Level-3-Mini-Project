@@ -257,10 +257,22 @@ export default function HomePage() {
                 <div className="card-footer"><span>{invention.inventors || "Inventor details not listed"}</span><span>{invention.patent_count} {invention.patent_count === 1 ? "patent" : "patents"}</span></div>
                 {user.role === "ADMIN" && (
                   <div className="card-actions">
-                    <button className="text-button" onClick={() => startEditing(invention)} disabled={busy}>
+                    <button
+                      type="button"
+                      className="text-button"
+                      onClick={() => startEditing(invention)}
+                      disabled={busy}
+                      aria-label={`Edit ${invention.title}`}
+                    >
                       Edit
                     </button>
-                    <button className="text-button danger-button" onClick={() => void deleteInvention(invention)} disabled={busy}>
+                    <button
+                      type="button"
+                      className="text-button danger-button"
+                      onClick={() => void deleteInvention(invention)}
+                      disabled={busy}
+                      aria-label={`Delete ${invention.title}`}
+                    >
                       Delete
                     </button>
                   </div>
@@ -276,7 +288,11 @@ export default function HomePage() {
       {user.role === "ADMIN" && (
         <section className="admin-section">
           <div className="section-heading"><div><p className="eyebrow">COLLECTION MANAGEMENT</p><h2>{editingInvention ? "Edit invention" : "Add an invention"}</h2></div><span className="admin-badge">ADMIN</span></div>
-          <form className="admin-form" onSubmit={addInvention}>
+          <form
+            className="admin-form"
+            onSubmit={addInvention}
+            aria-label={editingInvention ? `Edit ${editingInvention.title}` : "Add an invention"}
+          >
             <label>Title<input required minLength={3} maxLength={200} value={newInvention.title} onChange={(event) => setNewInvention({ ...newInvention, title: event.target.value })} /></label>
             <label>Category<input required minLength={2} maxLength={100} value={newInvention.category} onChange={(event) => setNewInvention({ ...newInvention, category: event.target.value })} /></label>
             <label className="wide">Abstract<textarea maxLength={5000} rows={2} value={newInvention.abstract} onChange={(event) => setNewInvention({ ...newInvention, abstract: event.target.value })} /></label>
