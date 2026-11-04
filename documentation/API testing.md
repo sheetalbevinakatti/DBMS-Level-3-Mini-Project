@@ -66,3 +66,31 @@ Expected behavior:
 | `GET /api/auth/me` with a valid session | `200`, current user object |
 | `POST /api/auth/logout` | `200`, `{"ok":true}`, cookie cleared |
 
+## Inventions
+
+With the session from the authentication example, list the invention catalog:
+
+```powershell
+Invoke-RestMethod -Method Get -Uri "$baseUrl/api/inventions" -WebSession $session
+```
+
+This requires any signed-in user and returns an `inventions` array. Create an
+invention using an administrator session:
+
+```powershell
+$inventionBody = @{
+  title = "Low-power water quality sensor"
+  abstract = "A sensor that monitors water quality using low-power components."
+  description = "Example record created while testing the API."
+  category = "Environmental monitoring"
+} | ConvertTo-Json
+$created = Invoke-RestMethod -Method Post -Uri "$baseUrl/api/inventions" `
+  -ContentType "application/json" -Body $inventionBody -WebSession $session
+$created
+```
+
+The create request returns HTTP `201` and an `invention_id`. Save that ID for
+the update and delete examples. The `title` must be 3–200 characters and
+`category` 2–100 characters. `abstract` and `description` are optional and have
+maximum lengths of 5,000 and 10,000 characters, respectively.
+
