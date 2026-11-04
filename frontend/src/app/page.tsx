@@ -260,7 +260,7 @@ export default function HomePage() {
                     <button className="text-button" onClick={() => startEditing(invention)} disabled={busy}>
                       Edit
                     </button>
-                    <button className="text-button" onClick={() => void deleteInvention(invention)} disabled={busy}>
+                    <button className="text-button danger-button" onClick={() => void deleteInvention(invention)} disabled={busy}>
                       Delete
                     </button>
                   </div>
