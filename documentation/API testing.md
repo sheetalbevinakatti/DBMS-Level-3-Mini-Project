@@ -94,3 +94,31 @@ the update and delete examples. The `title` must be 3–200 characters and
 `category` 2–100 characters. `abstract` and `description` are optional and have
 maximum lengths of 5,000 and 10,000 characters, respectively.
 
+Update the record (PATCH requires all four fields in the request body):
+
+```powershell
+$inventionId = $created.invention_id
+$updatedBody = @{
+  title = "Low-power water quality sensor v2"
+  abstract = "Updated example abstract."
+  description = "Updated example record."
+  category = "Environmental monitoring"
+} | ConvertTo-Json
+Invoke-RestMethod -Method Patch -Uri "$baseUrl/api/inventions/$inventionId" `
+  -ContentType "application/json" -Body $updatedBody -WebSession $session
+```
+
+Delete the example record when finished:
+
+```powershell
+Invoke-RestMethod -Method Delete -Uri "$baseUrl/api/inventions/$inventionId" `
+  -WebSession $session
+```
+
+`POST`, `PATCH`, and `DELETE` require an admin session; a regular signed-in
+user receives HTTP `403`, and a request without a session receives HTTP `401`.
+Invalid fields or IDs return HTTP `400`; a missing record returns HTTP `404`.
+Deleting an invention referenced by patent records returns HTTP `409`. Create
+and update also index the invention in Qdrant, so they can return HTTP `503` if
+vector indexing fails even though the database change was saved.
+
