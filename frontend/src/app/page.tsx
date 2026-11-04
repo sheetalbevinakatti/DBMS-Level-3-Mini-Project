@@ -31,6 +31,7 @@ export default function HomePage() {
   const [loginPassword, setLoginPassword] = useState("");
   const [query, setQuery] = useState("");
   const [newInvention, setNewInvention] = useState({ title: "", category: "", abstract: "", description: "" });
+  const [editingInvention, setEditingInvention] = useState<Invention | null>(null);
 
   const loadInventions = useCallback(async () => {
     const data = await responseJson<{ inventions: Invention[] }>(
@@ -133,6 +134,23 @@ export default function HomePage() {
     }
   }
 
+  function startEditing(invention: Invention) {
+    setEditingInvention(invention);
+    setNewInvention({
+      title: invention.title,
+      category: invention.category,
+      abstract: invention.abstract ?? "",
+      description: invention.description ?? "",
+    });
+    setResults(null);
+    setNotice("");
+  }
+
+  function cancelEditing() {
+    setEditingInvention(null);
+    setNewInvention({ title: "", category: "", abstract: "", description: "" });
+  }
+
   if (loading) {
     return <main className="loading-screen">Loading PatentPath…</main>;
   }
@@ -197,6 +215,13 @@ export default function HomePage() {
                 <h3>{invention.title}</h3>
                 <p>{invention.abstract || invention.description || "No summary has been added yet."}</p>
                 <div className="card-footer"><span>{invention.inventors || "Inventor details not listed"}</span><span>{invention.patent_count} {invention.patent_count === 1 ? "patent" : "patents"}</span></div>
+                {user.role === "ADMIN" && (
+                  <div className="card-actions">
+                    <button className="text-button" onClick={() => startEditing(invention)} disabled={busy}>
+                      Edit
+                    </button>
+                  </div>
+                )}
               </article>
             ))}
           </div>
@@ -207,13 +232,18 @@ export default function HomePage() {
 
       {user.role === "ADMIN" && (
         <section className="admin-section">
-          <div className="section-heading"><div><p className="eyebrow">COLLECTION MANAGEMENT</p><h2>Add an invention</h2></div><span className="admin-badge">ADMIN</span></div>
+          <div className="section-heading"><div><p className="eyebrow">COLLECTION MANAGEMENT</p><h2>{editingInvention ? "Edit invention" : "Add an invention"}</h2></div><span className="admin-badge">ADMIN</span></div>
           <form className="admin-form" onSubmit={addInvention}>
             <label>Title<input required minLength={3} maxLength={200} value={newInvention.title} onChange={(event) => setNewInvention({ ...newInvention, title: event.target.value })} /></label>
             <label>Category<input required minLength={2} maxLength={100} value={newInvention.category} onChange={(event) => setNewInvention({ ...newInvention, category: event.target.value })} /></label>
             <label className="wide">Abstract<textarea maxLength={5000} rows={2} value={newInvention.abstract} onChange={(event) => setNewInvention({ ...newInvention, abstract: event.target.value })} /></label>
             <label className="wide">Description<textarea maxLength={10000} rows={3} value={newInvention.description} onChange={(event) => setNewInvention({ ...newInvention, description: event.target.value })} /></label>
-            <button className="primary-button" disabled={busy}>Save and index invention</button>
+            <button className="primary-button" disabled={busy}>{editingInvention ? "Save changes" : "Save and index invention"}</button>
+            {editingInvention && (
+              <button type="button" className="text-button" onClick={cancelEditing} disabled={busy}>
+                Cancel edit
+              </button>
+            )}
           </form>
         </section>
       )}
