@@ -122,3 +122,18 @@ Deleting an invention referenced by patent records returns HTTP `409`. Create
 and update also index the invention in Qdrant, so they can return HTTP `503` if
 vector indexing fails even though the database change was saved.
 
+## Semantic search
+
+With any signed-in user session, submit a query containing 3–1,000 characters:
+
+```powershell
+$searchBody = @{ query = "low power water quality monitoring" } | ConvertTo-Json
+Invoke-RestMethod -Method Post -Uri "$baseUrl/api/search" `
+  -ContentType "application/json" -Body $searchBody -WebSession $session
+```
+
+The response contains a `searchId` and up to 10 matching invention records in
+`results`, ordered by similarity. Each result includes a `similarity` score.
+Searches and their analyses are recorded in the database. A missing session
+returns HTTP `401`; an invalid or too-short query returns HTTP `400`. Ensure
+both MySQL and Qdrant are ready before testing semantic search.
