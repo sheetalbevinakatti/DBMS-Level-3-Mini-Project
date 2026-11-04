@@ -135,7 +135,22 @@ export default function HomePage() {
       await loadInventions();
       setNotice(isEditing ? "Invention updated and re-indexed for semantic search." : "Invention saved and indexed for semantic search.");
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "The invention could not be saved.");
+      const message = error instanceof Error ? error.message : "The invention could not be saved.";
+      const savedWithoutIndex = message.includes("semantic indexing failed");
+      try {
+        await loadInventions();
+        if (savedWithoutIndex) {
+          setEditingInvention(null);
+          setNewInvention({ title: "", category: "", abstract: "", description: "" });
+          setResults(null);
+        }
+        setNotice(message);
+      } catch (refreshError) {
+        const refreshMessage = refreshError instanceof Error
+          ? refreshError.message
+          : "The invention list could not be refreshed.";
+        setNotice(`${message} ${refreshMessage}`);
+      }
     } finally {
       setBusy(false);
     }
