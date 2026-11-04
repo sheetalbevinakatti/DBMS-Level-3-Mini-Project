@@ -38,6 +38,7 @@ export default function HomePage() {
       await fetch("/api/inventions", { cache: "no-store" }),
     );
     setInventions(data.inventions);
+    return data.inventions;
   }, []);
 
   const loadSession = useCallback(async () => {
@@ -171,7 +172,20 @@ export default function HomePage() {
       await loadInventions();
       setNotice(`"${invention.title}" was deleted.`);
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "The invention could not be deleted.");
+      const message = error instanceof Error ? error.message : "The invention could not be deleted.";
+      try {
+        const latestInventions = await loadInventions();
+        if (!latestInventions.some((item) => item.invention_id === invention.invention_id)) {
+          if (editingInvention?.invention_id === invention.invention_id) cancelEditing();
+          setResults(null);
+        }
+        setNotice(message);
+      } catch (refreshError) {
+        const refreshMessage = refreshError instanceof Error
+          ? refreshError.message
+          : "The invention list could not be refreshed.";
+        setNotice(`${message} ${refreshMessage}`);
+      }
     } finally {
       setBusy(false);
     }
