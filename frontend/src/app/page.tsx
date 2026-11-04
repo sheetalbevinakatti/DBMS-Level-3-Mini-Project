@@ -119,14 +119,20 @@ export default function HomePage() {
     setBusy(true);
     setNotice("");
     try {
-      await responseJson(await fetch("/api/inventions", {
-        method: "POST",
+      const isEditing = editingInvention !== null;
+      const endpoint = isEditing
+        ? `/api/inventions/${editingInvention.invention_id}`
+        : "/api/inventions";
+      await responseJson(await fetch(endpoint, {
+        method: isEditing ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newInvention),
       }));
+      setEditingInvention(null);
       setNewInvention({ title: "", category: "", abstract: "", description: "" });
+      setResults(null);
       await loadInventions();
-      setNotice("Invention saved and indexed for semantic search.");
+      setNotice(isEditing ? "Invention updated and re-indexed for semantic search." : "Invention saved and indexed for semantic search.");
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "The invention could not be saved.");
     } finally {
