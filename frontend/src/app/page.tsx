@@ -157,6 +157,26 @@ export default function HomePage() {
     setNewInvention({ title: "", category: "", abstract: "", description: "" });
   }
 
+  async function deleteInvention(invention: Invention) {
+    if (!window.confirm(`Delete "${invention.title}"? This cannot be undone.`)) return;
+
+    setBusy(true);
+    setNotice("");
+    try {
+      await responseJson(await fetch(`/api/inventions/${invention.invention_id}`, {
+        method: "DELETE",
+      }));
+      if (editingInvention?.invention_id === invention.invention_id) cancelEditing();
+      setResults(null);
+      await loadInventions();
+      setNotice(`"${invention.title}" was deleted.`);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "The invention could not be deleted.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   if (loading) {
     return <main className="loading-screen">Loading PatentPath…</main>;
   }
@@ -225,6 +245,9 @@ export default function HomePage() {
                   <div className="card-actions">
                     <button className="text-button" onClick={() => startEditing(invention)} disabled={busy}>
                       Edit
+                    </button>
+                    <button className="text-button" onClick={() => void deleteInvention(invention)} disabled={busy}>
+                      Delete
                     </button>
                   </div>
                 )}
