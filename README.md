@@ -56,3 +56,16 @@ outside the application.
 These accounts are for local demonstration only. Change or remove them and
 rotate secrets before deploying the application.
 
+## Documentation and verification
+
+- [API testing guide](documentation/API%20testing.md)
+- [Database schema, queries, procedures, and triggers](database/)
+
+```powershell
+npx tsc --noEmit
+npm run build
+npm audit
+```
+
+Check service readiness at <http://127.0.0.1:3000/api/health>. MySQL and Qdrant
+must both be connected for semantic search.
