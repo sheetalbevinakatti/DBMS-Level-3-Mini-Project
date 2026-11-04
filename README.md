@@ -45,3 +45,14 @@ Open <http://127.0.0.1:3000>. The initial vector-indexing step downloads the
 embedding model. Re-run it after importing or changing invention records
 outside the application.
 
+## Demo accounts
+
+| Role | Email | Password |
+|---|---|---|
+| Researcher | `aarav@example.com` | `PatentPathDemo123!` |
+| Researcher | `meera@example.com` | `PatentPathDemo123!` |
+| Admin | `admin@example.com` | `AdminDemo123!` |
+
+These accounts are for local demonstration only. Change or remove them and
+rotate secrets before deploying the application.
+
