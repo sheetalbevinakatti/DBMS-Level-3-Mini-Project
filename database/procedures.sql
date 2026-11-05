@@ -7,6 +7,7 @@ DROP PROCEDURE IF EXISTS sp_application_status_summary;
 DROP PROCEDURE IF EXISTS sp_invention_patent_details;
 DROP PROCEDURE IF EXISTS sp_user_search_history;
 DROP PROCEDURE IF EXISTS sp_search_result_details;
+DROP PROCEDURE IF EXISTS sp_category_application_summary;
 DROP PROCEDURE IF EXISTS sp_category_summary;
 DROP FUNCTION IF EXISTS fn_application_count_for_user;
 DROP FUNCTION IF EXISTS fn_patent_count_for_user;
@@ -26,6 +27,22 @@ BEGIN
   LEFT JOIN patent_applications AS pa ON pa.current_status = statuses.status
   GROUP BY statuses.status
   ORDER BY FIELD(statuses.status, 'DRAFT', 'FILED', 'UNDER_REVIEW', 'APPROVED', 'REJECTED');
+END$$
+
+CREATE PROCEDURE sp_category_application_summary()
+BEGIN
+  SELECT
+    i.category,
+    COUNT(DISTINCT pa.application_id) AS application_count,
+    COUNT(DISTINCT CASE WHEN pa.current_status = 'DRAFT' THEN pa.application_id END) AS draft_count,
+    COUNT(DISTINCT CASE WHEN pa.current_status = 'FILED' THEN pa.application_id END) AS filed_count,
+    COUNT(DISTINCT CASE WHEN pa.current_status = 'UNDER_REVIEW' THEN pa.application_id END) AS under_review_count,
+    COUNT(DISTINCT CASE WHEN pa.current_status = 'APPROVED' THEN pa.application_id END) AS approved_count,
+    COUNT(DISTINCT CASE WHEN pa.current_status = 'REJECTED' THEN pa.application_id END) AS rejected_count
+  FROM inventions AS i
+  LEFT JOIN patent_applications AS pa ON pa.invention_id = i.invention_id
+  GROUP BY i.category
+  ORDER BY i.category;
 END$$
 
 CREATE PROCEDURE sp_invention_patent_details(

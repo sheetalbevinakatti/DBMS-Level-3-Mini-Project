@@ -122,3 +122,6 @@ CALL sp_user_search_history(1, 10);
 
 -- 16. Stored procedure example: ranked patent matches for one saved search.
 CALL sp_search_result_details(1);
+
+-- 17. Stored procedure example: application status totals by invention category.
+CALL sp_category_application_summary();
