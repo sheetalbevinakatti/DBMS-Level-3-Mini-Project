@@ -55,8 +55,84 @@ ON DUPLICATE KEY UPDATE
   category = VALUES(category),
   created_by = VALUES(created_by);
 
+INSERT INTO inventions (title, abstract, description, category, created_by)
+SELECT
+  'Solar-Powered Crop Storage Monitor',
+  'A solar-powered monitoring unit tracks temperature and humidity in small crop-storage facilities and warns operators when produce may be at risk.',
+  'The unit combines low-power temperature and humidity sensors with a solar-charged battery. Local alerts help farmers respond to storage conditions without requiring continuous grid power.',
+  'Agriculture',
+  1
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM inventions
+  WHERE title = 'Solar-Powered Crop Storage Monitor' AND category = 'Agriculture'
+);
+
+INSERT INTO inventions (title, abstract, description, category, created_by)
+SELECT
+  'Wearable Fall Detection and Alert Device',
+  'A wearable device analyzes motion-sensor readings to detect likely falls and notify a designated contact.',
+  'The device evaluates acceleration and orientation patterns, then provides a user-cancelable alert before sending a notification. It is designed as an assistive alert, not a medical diagnostic.',
+  'Healthcare',
+  2
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM inventions
+  WHERE title = 'Wearable Fall Detection and Alert Device' AND category = 'Healthcare'
+);
+
+INSERT INTO inventions (title, abstract, description, category, created_by)
+SELECT
+  'Adaptive Traffic Signal Coordinator',
+  'A traffic-control system adjusts signal timing using vehicle queue estimates from connected roadside sensors.',
+  'The coordinator combines live lane-level counts with configurable timing limits to reduce unnecessary waits while preserving pedestrian crossing intervals.',
+  'Transportation',
+  1
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM inventions
+  WHERE title = 'Adaptive Traffic Signal Coordinator' AND category = 'Transportation'
+);
+
+INSERT INTO inventions (title, abstract, description, category, created_by)
+SELECT
+  'Greywater Reuse Quality Controller',
+  'A household controller monitors basic greywater conditions and routes suitable water to non-potable reuse.',
+  'Sensor readings and configurable thresholds control diverter valves between a treatment stage, a reuse tank, and a safe drain path. The system keeps potable plumbing separate.',
+  'Water Management',
+  2
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM inventions
+  WHERE title = 'Greywater Reuse Quality Controller' AND category = 'Water Management'
+);
+
 INSERT INTO invention_inventors (invention_id, inventor_id) VALUES
   (1, 1), (1, 2), (2, 2), (3, 1), (4, 2)
+ON DUPLICATE KEY UPDATE invention_id = VALUES(invention_id);
+
+INSERT INTO invention_inventors (invention_id, inventor_id)
+SELECT i.invention_id, 1
+FROM inventions AS i
+WHERE i.title = 'Solar-Powered Crop Storage Monitor' AND i.category = 'Agriculture'
+ON DUPLICATE KEY UPDATE invention_id = VALUES(invention_id);
+
+INSERT INTO invention_inventors (invention_id, inventor_id)
+SELECT i.invention_id, 2
+FROM inventions AS i
+WHERE i.title = 'Wearable Fall Detection and Alert Device' AND i.category = 'Healthcare'
+ON DUPLICATE KEY UPDATE invention_id = VALUES(invention_id);
+
+INSERT INTO invention_inventors (invention_id, inventor_id)
+SELECT i.invention_id, 1
+FROM inventions AS i
+WHERE i.title = 'Adaptive Traffic Signal Coordinator' AND i.category = 'Transportation'
+ON DUPLICATE KEY UPDATE invention_id = VALUES(invention_id);
+
+INSERT INTO invention_inventors (invention_id, inventor_id)
+SELECT i.invention_id, 2
+FROM inventions AS i
+WHERE i.title = 'Greywater Reuse Quality Controller' AND i.category = 'Water Management'
 ON DUPLICATE KEY UPDATE invention_id = VALUES(invention_id);
 
 INSERT INTO patent_applications
@@ -68,6 +144,27 @@ VALUES
   (4, 'PP-APP-2026-0004', 4, 2, '2026-10-01', 'FILED')
 ON DUPLICATE KEY UPDATE
   application_number = VALUES(application_number),
+  invention_id = VALUES(invention_id),
+  inventor_id = VALUES(inventor_id),
+  filing_date = VALUES(filing_date),
+  current_status = VALUES(current_status);
+
+INSERT INTO patent_applications
+  (application_number, invention_id, inventor_id, filing_date, current_status)
+VALUES
+  ('PP-APP-2026-0005',
+   (SELECT invention_id FROM inventions WHERE title = 'Solar-Powered Crop Storage Monitor' AND category = 'Agriculture' ORDER BY invention_id LIMIT 1),
+   1, '2026-10-10', 'APPROVED'),
+  ('PP-APP-2026-0006',
+   (SELECT invention_id FROM inventions WHERE title = 'Wearable Fall Detection and Alert Device' AND category = 'Healthcare' ORDER BY invention_id LIMIT 1),
+   2, '2026-10-14', 'UNDER_REVIEW'),
+  ('PP-APP-2026-0007',
+   (SELECT invention_id FROM inventions WHERE title = 'Adaptive Traffic Signal Coordinator' AND category = 'Transportation' ORDER BY invention_id LIMIT 1),
+   1, '2026-10-18', 'FILED'),
+  ('PP-APP-2026-0008',
+   (SELECT invention_id FROM inventions WHERE title = 'Greywater Reuse Quality Controller' AND category = 'Water Management' ORDER BY invention_id LIMIT 1),
+   2, '2026-10-22', 'APPROVED')
+ON DUPLICATE KEY UPDATE
   invention_id = VALUES(invention_id),
   inventor_id = VALUES(inventor_id),
   filing_date = VALUES(filing_date),
@@ -85,6 +182,24 @@ VALUES
 ON DUPLICATE KEY UPDATE
   application_id = VALUES(application_id),
   patent_number = VALUES(patent_number),
+  title = VALUES(title),
+  abstract = VALUES(abstract),
+  filing_date = VALUES(filing_date),
+  publication_date = VALUES(publication_date);
+
+INSERT INTO patents
+  (application_id, patent_number, title, abstract, filing_date, publication_date)
+VALUES
+  ((SELECT application_id FROM patent_applications WHERE application_number = 'PP-APP-2026-0005'),
+   'PP-2026-0003', 'Solar-Powered Crop Storage Monitor',
+   'A low-power sensor unit monitors temperature and humidity in crop storage.',
+   '2026-10-10', '2026-11-01'),
+  ((SELECT application_id FROM patent_applications WHERE application_number = 'PP-APP-2026-0008'),
+   'PP-2026-0004', 'Greywater Reuse Quality Controller',
+   'A sensor-guided controller routes suitable greywater to non-potable reuse.',
+   '2026-10-22', NULL)
+ON DUPLICATE KEY UPDATE
+  application_id = VALUES(application_id),
   title = VALUES(title),
   abstract = VALUES(abstract),
   filing_date = VALUES(filing_date),
