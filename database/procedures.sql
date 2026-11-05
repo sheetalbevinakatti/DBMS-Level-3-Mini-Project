@@ -6,6 +6,7 @@ DROP PROCEDURE IF EXISTS sp_user_application_summary;
 DROP PROCEDURE IF EXISTS sp_application_status_summary;
 DROP PROCEDURE IF EXISTS sp_invention_patent_details;
 DROP PROCEDURE IF EXISTS sp_category_summary;
+DROP FUNCTION IF EXISTS fn_application_count_for_user;
 DROP FUNCTION IF EXISTS fn_patent_count_for_user;
 
 DELIMITER $$
@@ -127,6 +128,21 @@ BEGIN
   LEFT JOIN patents AS p ON p.application_id = pa.application_id
   GROUP BY i.category
   ORDER BY invention_count DESC, i.category;
+END$$
+
+CREATE FUNCTION fn_application_count_for_user(p_user_id BIGINT UNSIGNED)
+RETURNS INT UNSIGNED
+READS SQL DATA
+BEGIN
+  DECLARE v_application_count INT UNSIGNED DEFAULT 0;
+
+  SELECT COUNT(DISTINCT pa.application_id)
+  INTO v_application_count
+  FROM inventors AS inv
+  JOIN patent_applications AS pa ON pa.inventor_id = inv.inventor_id
+  WHERE inv.user_id = p_user_id;
+
+  RETURN v_application_count;
 END$$
 
 CREATE FUNCTION fn_patent_count_for_user(p_user_id BIGINT UNSIGNED)

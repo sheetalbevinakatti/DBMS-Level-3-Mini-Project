@@ -108,3 +108,11 @@ CALL sp_application_status_summary();
 
 -- 13. Stored procedure example: applications and issued patents for one invention.
 CALL sp_invention_patent_details(1);
+
+-- 14. Stored function example: application totals alongside issued patent totals.
+SELECT
+  name,
+  fn_application_count_for_user(user_id) AS application_count,
+  fn_patent_count_for_user(user_id) AS issued_patent_count
+FROM users
+ORDER BY application_count DESC, name;
