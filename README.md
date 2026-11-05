@@ -45,6 +45,11 @@ Open <http://127.0.0.1:3000>. The initial vector-indexing step downloads the
 embedding model. Re-run it after importing or changing invention records
 outside the application.
 
+The seed data provides 12 fictional inventions across several categories,
+with related applications and sample patents. Re-run
+`npm run db:index-vectors` after database setup to index the seeded records
+for semantic search.
+
 ## Demo accounts
 
 | Role | Email | Password |

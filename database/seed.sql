@@ -107,6 +107,58 @@ WHERE NOT EXISTS (
   WHERE title = 'Greywater Reuse Quality Controller' AND category = 'Water Management'
 );
 
+INSERT INTO inventions (title, abstract, description, category, created_by)
+SELECT
+  'Community Flood Early Warning Network',
+  'A neighborhood sensor network combines local water-level readings to warn residents when flood conditions may be developing.',
+  'Low-power riverbank and drainage sensors report water levels to a local gateway. The gateway applies configurable thresholds and relays alerts to community operators when readings rise.',
+  'Disaster Resilience',
+  2
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM inventions
+  WHERE title = 'Community Flood Early Warning Network' AND category = 'Disaster Resilience'
+);
+
+INSERT INTO inventions (title, abstract, description, category, created_by)
+SELECT
+  'Adaptive Assistive Reading Display',
+  'An electronic reading display adjusts text spacing and contrast using reader-selected accessibility preferences.',
+  'The display stores per-reader presentation settings and applies them to imported text. Controls support adjustable font size, line spacing, and contrast without changing the source document.',
+  'Accessibility',
+  1
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM inventions
+  WHERE title = 'Adaptive Assistive Reading Display' AND category = 'Accessibility'
+);
+
+INSERT INTO inventions (title, abstract, description, category, created_by)
+SELECT
+  'Predictive Industrial Vibration Monitor',
+  'A machine-monitoring unit tracks equipment vibration trends and flags readings that may need maintenance review.',
+  'The unit samples vibration at configured intervals, compares the measurements with an equipment-specific baseline, and records trend alerts for maintenance teams.',
+  'Manufacturing',
+  2
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM inventions
+  WHERE title = 'Predictive Industrial Vibration Monitor' AND category = 'Manufacturing'
+);
+
+INSERT INTO inventions (title, abstract, description, category, created_by)
+SELECT
+  'Community Solar Load Balancer',
+  'A local energy controller schedules flexible loads using community solar generation and shared battery availability.',
+  'The controller reads generation and storage measurements, then schedules configured noncritical loads within operator-defined limits to better align local demand with available renewable power.',
+  'Energy',
+  1
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM inventions
+  WHERE title = 'Community Solar Load Balancer' AND category = 'Energy'
+);
+
 INSERT INTO invention_inventors (invention_id, inventor_id) VALUES
   (1, 1), (1, 2), (2, 2), (3, 1), (4, 2)
 ON DUPLICATE KEY UPDATE invention_id = VALUES(invention_id);
@@ -133,6 +185,30 @@ INSERT INTO invention_inventors (invention_id, inventor_id)
 SELECT i.invention_id, 2
 FROM inventions AS i
 WHERE i.title = 'Greywater Reuse Quality Controller' AND i.category = 'Water Management'
+ON DUPLICATE KEY UPDATE invention_id = VALUES(invention_id);
+
+INSERT INTO invention_inventors (invention_id, inventor_id)
+SELECT i.invention_id, 2
+FROM inventions AS i
+WHERE i.title = 'Community Flood Early Warning Network' AND i.category = 'Disaster Resilience'
+ON DUPLICATE KEY UPDATE invention_id = VALUES(invention_id);
+
+INSERT INTO invention_inventors (invention_id, inventor_id)
+SELECT i.invention_id, 1
+FROM inventions AS i
+WHERE i.title = 'Adaptive Assistive Reading Display' AND i.category = 'Accessibility'
+ON DUPLICATE KEY UPDATE invention_id = VALUES(invention_id);
+
+INSERT INTO invention_inventors (invention_id, inventor_id)
+SELECT i.invention_id, 2
+FROM inventions AS i
+WHERE i.title = 'Predictive Industrial Vibration Monitor' AND i.category = 'Manufacturing'
+ON DUPLICATE KEY UPDATE invention_id = VALUES(invention_id);
+
+INSERT INTO invention_inventors (invention_id, inventor_id)
+SELECT i.invention_id, 1
+FROM inventions AS i
+WHERE i.title = 'Community Solar Load Balancer' AND i.category = 'Energy'
 ON DUPLICATE KEY UPDATE invention_id = VALUES(invention_id);
 
 INSERT INTO patent_applications
@@ -170,6 +246,27 @@ ON DUPLICATE KEY UPDATE
   filing_date = VALUES(filing_date),
   current_status = VALUES(current_status);
 
+INSERT INTO patent_applications
+  (application_number, invention_id, inventor_id, filing_date, current_status)
+VALUES
+  ('PP-APP-2026-0009',
+   (SELECT invention_id FROM inventions WHERE title = 'Community Flood Early Warning Network' AND category = 'Disaster Resilience' ORDER BY invention_id LIMIT 1),
+   2, '2026-10-25', 'APPROVED'),
+  ('PP-APP-2026-0010',
+   (SELECT invention_id FROM inventions WHERE title = 'Adaptive Assistive Reading Display' AND category = 'Accessibility' ORDER BY invention_id LIMIT 1),
+   1, '2026-10-28', 'UNDER_REVIEW'),
+  ('PP-APP-2026-0011',
+   (SELECT invention_id FROM inventions WHERE title = 'Predictive Industrial Vibration Monitor' AND category = 'Manufacturing' ORDER BY invention_id LIMIT 1),
+   2, '2026-11-01', 'FILED'),
+  ('PP-APP-2026-0012',
+   (SELECT invention_id FROM inventions WHERE title = 'Community Solar Load Balancer' AND category = 'Energy' ORDER BY invention_id LIMIT 1),
+   1, '2026-11-03', 'DRAFT')
+ON DUPLICATE KEY UPDATE
+  invention_id = VALUES(invention_id),
+  inventor_id = VALUES(inventor_id),
+  filing_date = VALUES(filing_date),
+  current_status = VALUES(current_status);
+
 INSERT INTO patents
   (patent_id, application_id, patent_number, title, abstract, filing_date, publication_date)
 VALUES
@@ -198,6 +295,20 @@ VALUES
    'PP-2026-0004', 'Greywater Reuse Quality Controller',
    'A sensor-guided controller routes suitable greywater to non-potable reuse.',
    '2026-10-22', NULL)
+ON DUPLICATE KEY UPDATE
+  application_id = VALUES(application_id),
+  title = VALUES(title),
+  abstract = VALUES(abstract),
+  filing_date = VALUES(filing_date),
+  publication_date = VALUES(publication_date);
+
+INSERT INTO patents
+  (application_id, patent_number, title, abstract, filing_date, publication_date)
+VALUES
+  ((SELECT application_id FROM patent_applications WHERE application_number = 'PP-APP-2026-0009'),
+   'PP-2026-0005', 'Community Flood Early Warning Network',
+   'A distributed sensor network reports local water levels to support flood alerts.',
+   '2026-10-25', '2026-11-04')
 ON DUPLICATE KEY UPDATE
   application_id = VALUES(application_id),
   title = VALUES(title),
