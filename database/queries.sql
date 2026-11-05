@@ -128,3 +128,6 @@ CALL sp_category_application_summary();
 
 -- 18. Stored procedure example: inventors associated with one invention.
 CALL sp_invention_inventor_list(1);
+
+-- 19. Stored procedure example: published and unpublished patents by category.
+CALL sp_patent_publication_summary();

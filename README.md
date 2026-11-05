@@ -60,7 +60,8 @@ rotate secrets before deploying the application.
 
 - [API testing guide](documentation/API%20testing.md)
 - [Database schema, queries, procedures, and triggers](database/)
-- Stored procedures provide validated status updates, application history, per-user status summaries, category summaries, and patent counts.
+- `procedures.sql` includes validated status updates; application history and status reports; invention, inventor, and saved-search details; and user application and patent counts.
+- `queries.sql` demonstrates calls to the stored procedures and functions as well as read-only reports.
 
 ```powershell
 npx tsc --noEmit

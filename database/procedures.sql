@@ -9,6 +9,7 @@ DROP PROCEDURE IF EXISTS sp_user_search_history;
 DROP PROCEDURE IF EXISTS sp_search_result_details;
 DROP PROCEDURE IF EXISTS sp_category_application_summary;
 DROP PROCEDURE IF EXISTS sp_invention_inventor_list;
+DROP PROCEDURE IF EXISTS sp_patent_publication_summary;
 DROP PROCEDURE IF EXISTS sp_category_summary;
 DROP FUNCTION IF EXISTS fn_application_count_for_user;
 DROP FUNCTION IF EXISTS fn_patent_count_for_user;
@@ -65,6 +66,20 @@ BEGIN
   JOIN inventors AS inv ON inv.inventor_id = ii.inventor_id
   WHERE ii.invention_id = p_invention_id
   ORDER BY inv.name, inv.inventor_id;
+END$$
+
+CREATE PROCEDURE sp_patent_publication_summary()
+BEGIN
+  SELECT
+    i.category,
+    COUNT(p.patent_id) AS patent_count,
+    COUNT(CASE WHEN p.publication_date IS NOT NULL THEN p.patent_id END) AS published_count,
+    COUNT(CASE WHEN p.publication_date IS NULL THEN p.patent_id END) AS unpublished_count
+  FROM patents AS p
+  JOIN patent_applications AS pa ON pa.application_id = p.application_id
+  JOIN inventions AS i ON i.invention_id = pa.invention_id
+  GROUP BY i.category
+  ORDER BY i.category;
 END$$
 
 CREATE PROCEDURE sp_invention_patent_details(
