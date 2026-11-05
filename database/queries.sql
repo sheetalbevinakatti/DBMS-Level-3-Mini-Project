@@ -99,3 +99,6 @@ ORDER BY issued_patents DESC, name;
 
 -- 10. Stored procedure example: chronological status history for one application.
 CALL sp_application_status_history(1);
+
+-- 11. Stored procedure example: application totals by status for one user.
+CALL sp_user_application_summary(1);

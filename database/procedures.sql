@@ -2,6 +2,7 @@ USE patentpath_assignment;
 
 DROP PROCEDURE IF EXISTS sp_update_application_status;
 DROP PROCEDURE IF EXISTS sp_application_status_history;
+DROP PROCEDURE IF EXISTS sp_user_application_summary;
 DROP PROCEDURE IF EXISTS sp_category_summary;
 DROP FUNCTION IF EXISTS fn_patent_count_for_user;
 
@@ -42,6 +43,32 @@ BEGIN
   FROM application_status_history
   WHERE application_id = p_application_id
   ORDER BY changed_at, status_history_id;
+END$$
+
+CREATE PROCEDURE sp_user_application_summary(
+  IN p_user_id BIGINT UNSIGNED
+)
+BEGIN
+  IF p_user_id IS NULL OR NOT EXISTS (
+    SELECT 1 FROM users WHERE user_id = p_user_id
+  ) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'User does not exist';
+  END IF;
+
+  SELECT
+    u.user_id,
+    u.name,
+    COUNT(pa.application_id) AS application_count,
+    COUNT(CASE WHEN pa.current_status = 'DRAFT' THEN pa.application_id END) AS draft_count,
+    COUNT(CASE WHEN pa.current_status = 'FILED' THEN pa.application_id END) AS filed_count,
+    COUNT(CASE WHEN pa.current_status = 'UNDER_REVIEW' THEN pa.application_id END) AS under_review_count,
+    COUNT(CASE WHEN pa.current_status = 'APPROVED' THEN pa.application_id END) AS approved_count,
+    COUNT(CASE WHEN pa.current_status = 'REJECTED' THEN pa.application_id END) AS rejected_count
+  FROM users AS u
+  LEFT JOIN inventors AS inv ON inv.user_id = u.user_id
+  LEFT JOIN patent_applications AS pa ON pa.inventor_id = inv.inventor_id
+  WHERE u.user_id = p_user_id
+  GROUP BY u.user_id, u.name;
 END$$
 
 CREATE PROCEDURE sp_category_summary()
