@@ -125,3 +125,6 @@ CALL sp_search_result_details(1);
 
 -- 17. Stored procedure example: application status totals by invention category.
 CALL sp_category_application_summary();
+
+-- 18. Stored procedure example: inventors associated with one invention.
+CALL sp_invention_inventor_list(1);

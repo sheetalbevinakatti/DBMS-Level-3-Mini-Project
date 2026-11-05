@@ -8,6 +8,7 @@ DROP PROCEDURE IF EXISTS sp_invention_patent_details;
 DROP PROCEDURE IF EXISTS sp_user_search_history;
 DROP PROCEDURE IF EXISTS sp_search_result_details;
 DROP PROCEDURE IF EXISTS sp_category_application_summary;
+DROP PROCEDURE IF EXISTS sp_invention_inventor_list;
 DROP PROCEDURE IF EXISTS sp_category_summary;
 DROP FUNCTION IF EXISTS fn_application_count_for_user;
 DROP FUNCTION IF EXISTS fn_patent_count_for_user;
@@ -43,6 +44,27 @@ BEGIN
   LEFT JOIN patent_applications AS pa ON pa.invention_id = i.invention_id
   GROUP BY i.category
   ORDER BY i.category;
+END$$
+
+CREATE PROCEDURE sp_invention_inventor_list(
+  IN p_invention_id BIGINT UNSIGNED
+)
+BEGIN
+  IF p_invention_id IS NULL OR NOT EXISTS (
+    SELECT 1 FROM inventions WHERE invention_id = p_invention_id
+  ) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invention does not exist';
+  END IF;
+
+  SELECT DISTINCT
+    inv.inventor_id,
+    inv.name,
+    inv.email,
+    inv.affiliation
+  FROM invention_inventors AS ii
+  JOIN inventors AS inv ON inv.inventor_id = ii.inventor_id
+  WHERE ii.invention_id = p_invention_id
+  ORDER BY inv.name, inv.inventor_id;
 END$$
 
 CREATE PROCEDURE sp_invention_patent_details(
