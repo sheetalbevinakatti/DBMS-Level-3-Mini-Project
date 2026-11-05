@@ -3,10 +3,26 @@ USE patentpath_assignment;
 DROP PROCEDURE IF EXISTS sp_update_application_status;
 DROP PROCEDURE IF EXISTS sp_application_status_history;
 DROP PROCEDURE IF EXISTS sp_user_application_summary;
+DROP PROCEDURE IF EXISTS sp_application_status_summary;
 DROP PROCEDURE IF EXISTS sp_category_summary;
 DROP FUNCTION IF EXISTS fn_patent_count_for_user;
 
 DELIMITER $$
+
+CREATE PROCEDURE sp_application_status_summary()
+BEGIN
+  SELECT statuses.status, COUNT(pa.application_id) AS application_count
+  FROM (
+    SELECT 'DRAFT' AS status
+    UNION ALL SELECT 'FILED'
+    UNION ALL SELECT 'UNDER_REVIEW'
+    UNION ALL SELECT 'APPROVED'
+    UNION ALL SELECT 'REJECTED'
+  ) AS statuses
+  LEFT JOIN patent_applications AS pa ON pa.current_status = statuses.status
+  GROUP BY statuses.status
+  ORDER BY FIELD(statuses.status, 'DRAFT', 'FILED', 'UNDER_REVIEW', 'APPROVED', 'REJECTED');
+END$$
 
 CREATE PROCEDURE sp_update_application_status(
   IN p_application_id BIGINT UNSIGNED,

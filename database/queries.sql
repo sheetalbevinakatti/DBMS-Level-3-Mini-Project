@@ -102,3 +102,6 @@ CALL sp_application_status_history(1);
 
 -- 11. Stored procedure example: application totals by status for one user.
 CALL sp_user_application_summary(1);
+
+-- 12. Stored procedure example: application totals for every status, including zeroes.
+CALL sp_application_status_summary();
