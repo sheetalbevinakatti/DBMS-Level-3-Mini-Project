@@ -5,6 +5,7 @@ DROP PROCEDURE IF EXISTS sp_application_status_history;
 DROP PROCEDURE IF EXISTS sp_user_application_summary;
 DROP PROCEDURE IF EXISTS sp_application_status_summary;
 DROP PROCEDURE IF EXISTS sp_invention_patent_details;
+DROP PROCEDURE IF EXISTS sp_user_search_history;
 DROP PROCEDURE IF EXISTS sp_category_summary;
 DROP FUNCTION IF EXISTS fn_application_count_for_user;
 DROP FUNCTION IF EXISTS fn_patent_count_for_user;
@@ -51,6 +52,35 @@ BEGIN
   LEFT JOIN patents AS p ON p.application_id = pa.application_id
   WHERE i.invention_id = p_invention_id
   ORDER BY pa.filing_date, pa.application_id;
+END$$
+
+CREATE PROCEDURE sp_user_search_history(
+  IN p_user_id BIGINT UNSIGNED,
+  IN p_limit INT UNSIGNED
+)
+BEGIN
+  IF p_user_id IS NULL OR NOT EXISTS (
+    SELECT 1 FROM users WHERE user_id = p_user_id
+  ) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'User does not exist';
+  END IF;
+
+  IF p_limit IS NULL OR p_limit < 1 OR p_limit > 100 THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Search history limit must be between 1 and 100';
+  END IF;
+
+  SELECT
+    s.search_id,
+    s.query_text,
+    s.search_method,
+    s.searched_at,
+    COUNT(DISTINCT sr.result_id) AS result_count
+  FROM searches AS s
+  LEFT JOIN search_results AS sr ON sr.search_id = s.search_id
+  WHERE s.user_id = p_user_id
+  GROUP BY s.search_id, s.query_text, s.search_method, s.searched_at
+  ORDER BY s.searched_at DESC, s.search_id DESC
+  LIMIT p_limit;
 END$$
 
 CREATE PROCEDURE sp_update_application_status(
