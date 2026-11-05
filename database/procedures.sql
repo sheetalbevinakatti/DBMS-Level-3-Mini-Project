@@ -6,6 +6,7 @@ DROP PROCEDURE IF EXISTS sp_user_application_summary;
 DROP PROCEDURE IF EXISTS sp_application_status_summary;
 DROP PROCEDURE IF EXISTS sp_invention_patent_details;
 DROP PROCEDURE IF EXISTS sp_user_search_history;
+DROP PROCEDURE IF EXISTS sp_search_result_details;
 DROP PROCEDURE IF EXISTS sp_category_summary;
 DROP FUNCTION IF EXISTS fn_application_count_for_user;
 DROP FUNCTION IF EXISTS fn_patent_count_for_user;
@@ -81,6 +82,35 @@ BEGIN
   GROUP BY s.search_id, s.query_text, s.search_method, s.searched_at
   ORDER BY s.searched_at DESC, s.search_id DESC
   LIMIT p_limit;
+END$$
+
+CREATE PROCEDURE sp_search_result_details(
+  IN p_search_id BIGINT UNSIGNED
+)
+BEGIN
+  IF p_search_id IS NULL OR NOT EXISTS (
+    SELECT 1 FROM searches WHERE search_id = p_search_id
+  ) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Search does not exist';
+  END IF;
+
+  SELECT
+    s.search_id,
+    s.query_text,
+    sr.result_rank,
+    sr.similarity_score,
+    p.patent_id,
+    p.patent_number,
+    p.title AS patent_title,
+    i.invention_id,
+    i.title AS invention_title
+  FROM searches AS s
+  JOIN search_results AS sr ON sr.search_id = s.search_id
+  JOIN patents AS p ON p.patent_id = sr.patent_id
+  JOIN patent_applications AS pa ON pa.application_id = p.application_id
+  JOIN inventions AS i ON i.invention_id = pa.invention_id
+  WHERE s.search_id = p_search_id
+  ORDER BY sr.result_rank;
 END$$
 
 CREATE PROCEDURE sp_update_application_status(

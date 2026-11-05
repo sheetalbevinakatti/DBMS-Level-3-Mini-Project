@@ -119,3 +119,6 @@ ORDER BY application_count DESC, name;
 
 -- 15. Stored procedure example: latest ten searches and their result counts.
 CALL sp_user_search_history(1, 10);
+
+-- 16. Stored procedure example: ranked patent matches for one saved search.
+CALL sp_search_result_details(1);
