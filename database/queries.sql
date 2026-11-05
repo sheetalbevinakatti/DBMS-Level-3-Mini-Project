@@ -105,3 +105,6 @@ CALL sp_user_application_summary(1);
 
 -- 12. Stored procedure example: application totals for every status, including zeroes.
 CALL sp_application_status_summary();
+
+-- 13. Stored procedure example: applications and issued patents for one invention.
+CALL sp_invention_patent_details(1);

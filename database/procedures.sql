@@ -4,6 +4,7 @@ DROP PROCEDURE IF EXISTS sp_update_application_status;
 DROP PROCEDURE IF EXISTS sp_application_status_history;
 DROP PROCEDURE IF EXISTS sp_user_application_summary;
 DROP PROCEDURE IF EXISTS sp_application_status_summary;
+DROP PROCEDURE IF EXISTS sp_invention_patent_details;
 DROP PROCEDURE IF EXISTS sp_category_summary;
 DROP FUNCTION IF EXISTS fn_patent_count_for_user;
 
@@ -22,6 +23,33 @@ BEGIN
   LEFT JOIN patent_applications AS pa ON pa.current_status = statuses.status
   GROUP BY statuses.status
   ORDER BY FIELD(statuses.status, 'DRAFT', 'FILED', 'UNDER_REVIEW', 'APPROVED', 'REJECTED');
+END$$
+
+CREATE PROCEDURE sp_invention_patent_details(
+  IN p_invention_id BIGINT UNSIGNED
+)
+BEGIN
+  IF p_invention_id IS NULL OR NOT EXISTS (
+    SELECT 1 FROM inventions WHERE invention_id = p_invention_id
+  ) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invention does not exist';
+  END IF;
+
+  SELECT
+    i.invention_id,
+    i.title AS invention_title,
+    pa.application_id,
+    pa.application_number,
+    pa.current_status,
+    p.patent_id,
+    p.patent_number,
+    p.title AS patent_title,
+    p.publication_date
+  FROM inventions AS i
+  LEFT JOIN patent_applications AS pa ON pa.invention_id = i.invention_id
+  LEFT JOIN patents AS p ON p.application_id = pa.application_id
+  WHERE i.invention_id = p_invention_id
+  ORDER BY pa.filing_date, pa.application_id;
 END$$
 
 CREATE PROCEDURE sp_update_application_status(
