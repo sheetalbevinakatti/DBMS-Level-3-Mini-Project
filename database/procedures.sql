@@ -1,6 +1,7 @@
 USE patentpath_assignment;
 
 DROP PROCEDURE IF EXISTS sp_update_application_status;
+DROP PROCEDURE IF EXISTS sp_application_status_history;
 DROP PROCEDURE IF EXISTS sp_category_summary;
 DROP FUNCTION IF EXISTS fn_patent_count_for_user;
 
@@ -25,6 +26,22 @@ BEGIN
   ) THEN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Patent application does not exist';
   END IF;
+END$$
+
+CREATE PROCEDURE sp_application_status_history(
+  IN p_application_id BIGINT UNSIGNED
+)
+BEGIN
+  IF p_application_id IS NULL OR NOT EXISTS (
+    SELECT 1 FROM patent_applications WHERE application_id = p_application_id
+  ) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Patent application does not exist';
+  END IF;
+
+  SELECT status_history_id, old_status, status, changed_at, remarks
+  FROM application_status_history
+  WHERE application_id = p_application_id
+  ORDER BY changed_at, status_history_id;
 END$$
 
 CREATE PROCEDURE sp_category_summary()

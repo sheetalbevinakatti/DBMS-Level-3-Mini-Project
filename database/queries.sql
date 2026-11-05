@@ -96,3 +96,6 @@ ROLLBACK;
 SELECT name, fn_patent_count_for_user(user_id) AS issued_patents
 FROM users
 ORDER BY issued_patents DESC, name;
+
+-- 10. Stored procedure example: chronological status history for one application.
+CALL sp_application_status_history(1);
